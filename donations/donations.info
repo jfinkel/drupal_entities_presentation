@@ -1,0 +1,6 @@
+name = Donations
+description = Supports the Donations system. 
+package = Donations
+core = 7.x
+dependencies[] = entity
+files[] = donations.info.inc

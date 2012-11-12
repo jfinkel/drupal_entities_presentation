@@ -1,0 +1,15 @@
+Author: Joel R Finkel
+        Systems by Design of Illinois, Ltd.
+        finkel@sd-il.com
+        Twitter: @Joel_Finkel
+
+The code in this module may be instructive in the use of the Entity API (entity) 
+module.  Hopefully the comments within the code are sufficient to help you 
+understand how the Entity API can be used.
+
+The module can be installed in any Drupal 7 instance and enabled just like any
+other contributed module.
+
+Note that the donors.txt file is a list of generated names that was used to 
+anonymize the actual donors database table for the purposes of public demos. It
+can be safely ignored.

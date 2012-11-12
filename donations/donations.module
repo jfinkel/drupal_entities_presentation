@@ -1,0 +1,449 @@
+<?php
+
+/*
+ * Implement HOOK_permission
+ * 
+ * Here we define the permissions that will be required by our module.
+ */
+
+function donations_permission()
+{
+	return array(
+		'administer donations' => array(
+			'title' => t('Administer Donations'),
+			'description' => t('Administer donations.'),
+		),
+		'maintain donors' => array(
+			'title' => t('Maintain Donors'),
+			'description' => t('Maintain donors.'),
+		),
+		'maintain donations' => array(
+			'title' => t('Maintain Donations'),
+			'description' => t('Maintain donations.'),
+		),
+	);
+}
+
+/**
+ * Implements HOOK_entity_info()
+ * 
+ * Here we use the Entity API contributed module (entity) to define our entities.
+ */
+function donations_entity_info()
+{
+	$info = array();
+	$info['donors'] = _entity_info_donors();
+	$info['donations'] = _entity_info_donations();
+	$info['funds'] = _entity_info_funds();
+
+	return $info;
+}
+
+function _entity_info_donors()
+{
+	return array(
+		'label' => t('Donors'),
+		'controller class' => 'EntityAPIController',  // Use the default controller.
+		'base table' => 'donors',
+		'entity class' => 'Entity',                   // Use the default entity class.
+		'uri callback' => 'entity_class_uri',         // Use the default uri callback.
+		'label callback' => 'entity_class_label',     // Use the default entity label.
+		'module' => 'donations',
+		'fieldable' => false,
+		'entity keys' => array(
+			'id' => 'id'
+		),
+		'bundles' => array(
+			'donors' => array(                          // We only have a single bundle.
+				'label' => 'Donors',
+			),
+		),
+		'view modes' => array(
+			'full' => array(                            // We only have a single view mode...no "teaser"
+				'label' => t('Full content'),
+				'custom settings' => FALSE,
+			),
+		),
+	);
+}
+
+function _entity_info_donations()
+{
+	return array(
+		'label' => t('Donations'),
+		'controller class' => 'EntityAPIController',  // Use the default controller.
+		'base table' => 'donations',
+		'entity class' => 'Entity',                   // Use the default entity class.
+		'uri callback' => 'entity_class_uri',         // Use the default uri callback.
+		'label callback' => 'entity_class_label',     // Use the default entity label.
+		'module' => 'donations',
+		'fieldable' => false,
+		'entity keys' => array(
+			'id' => 'id'
+		),
+		'bundles' => array(
+			'donations' => array(                          // We only have a single bundle.
+				'label' => 'Donations',
+			),
+		),
+		'view modes' => array(
+			'full' => array(                            // We only have a single view mode...no "teaser"
+				'label' => t('Full content'),
+				'custom settings' => FALSE,
+			),
+		),
+	);
+}
+
+function _entity_info_funds()
+{
+	return array(
+		'label' => t('Funds'),
+		'controller class' => 'EntityAPIController',  // Use the default controller.
+		'base table' => 'funds',
+		'entity class' => 'Entity',                   // Use the default entity class.
+		'uri callback' => 'entity_class_uri',         // Use the default uri callback.
+		'label callback' => 'entity_class_label',     // Use the default entity label.
+		'module' => 'donations',
+		'fieldable' => false,
+		'entity keys' => array(
+			'id' => 'id'
+		),
+		'bundles' => array(
+			'funds' => array(                          // We only have a single bundle.
+				'label' => 'Funds',
+			),
+		),
+		'view modes' => array(
+			'full' => array(                            // We only have a single view mode...no "teaser"
+				'label' => t('Full content'),
+				'custom settings' => FALSE,
+			),
+		),
+	);
+}
+
+/**
+ * Implement HOOK_menu()
+ * 
+ * Here we define where our pages are, what permissions are required to get there, and what the page callbacks are.
+ */
+function donations_menu()
+{
+	$items = array();
+
+	$items['funds'] = array(
+		'title' => 'Maintain Funds',
+		'description' => 'Maintain the list of funds.',
+		'page callback' => 'callback_maintain_funds',
+		'access arguments' => array('administer donations'),
+		'type' => MENU_NORMAL_ITEM,
+	);
+
+	$items['funds/add'] = array(
+		'title' => 'Add Fund',
+		'description' => 'Add fund.',
+		'page callback' => 'callback_add_fund',
+		'access arguments' => array('administer donations'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['funds/edit/%'] = array(
+		'title' => 'Edit Fund',
+		'description' => 'Edit fund.',
+		'page callback' => 'callback_edit_fund',
+		'page arguments' => array(2),
+		'access arguments' => array('administer donations'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['donors/add'] = array(
+		'title' => 'Add Donor',
+		'description' => 'Add donor.',
+		'page callback' => 'callback_add_donor',
+		'access arguments' => array('administer donations'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['donors/edit/%'] = array(
+		'title' => 'Edit Donor',
+		'description' => 'Edit donor.',
+		'page callback' => 'callback_edit_donor',
+		'page arguments' => array(2),
+		'access arguments' => array('administer donations'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['donors/delete/%'] = array(
+		'title' => 'Delete Donor',
+		'description' => 'Delete donor.',
+		'page callback' => 'callback_delete_donor',
+		'page arguments' => array(2),
+		'access arguments' => array('administer donations'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['donations/%/add'] = array(
+		'title' => 'Add Donation',
+		'description' => 'Add a donation.',
+		'page callback' => 'callback_add_donation',
+		'page arguments' => array(1),
+		'access arguments' => array('administer donations'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['donations/%/edit'] = array(
+		'title' => 'Edit Donation',
+		'description' => 'Edit a donation.',
+		'page callback' => 'callback_edit_donation',
+		'page arguments' => array(1),
+		'access arguments' => array('administer donations'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['donations/%/delete'] = array(
+		'title' => 'Delete Donation',
+		'description' => 'Delate a donation.',
+		'page callback' => 'callback_delete_donation',
+		'page arguments' => array(1),
+		'access arguments' => array('administer donations'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['report'] = array(
+		'title' => 'Donations Report',
+		'description' => 'Generate donations report.',
+		'page callback' => 'callback_donations_report_main',
+		'page arguments' => array(2, 3, 4),
+		'access arguments' => array('administer donations'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['report/view/%/%/%/%'] = array(
+		'title' => 'Donations Report',
+		'description' => 'Generate donations report.',
+		'page callback' => 'callback_donations_report',
+		'page arguments' => array(2, 3, 4, 5),
+		'access arguments' => array('administer donations'),
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['admin/donors/anonymize'] = array(
+		'title' => 'Anonymize',
+		'description' => 'Anonymize donors.',
+		'page callback' => 'callback_anonymize',
+		'access callback' => true,
+		'type' => MENU_CALLBACK,
+	);
+
+	return $items;
+}
+
+/**
+ * This function is used once to change all the names in the database to fake names.
+ * This is required so that when using this as a demo, none of the real names are made public.
+ * This function is not required in production.
+ * People reading this code to learn about Entities should just ignore this function.
+ */
+function callback_anonymize()
+{
+	$filename = drupal_get_path('module', 'donations') . '/donors.txt';
+	$names = file($filename);
+
+	foreach ($names as $key => $name)
+	{
+		$foo = explode(' ', $name);
+		$sort_name = trim($foo[1]) . ', ' . $foo[0];
+		db_update('donors')
+						->condition('id', $key + 3, '=')
+						->fields(array('name' => $name, 'sort_name' => $sort_name))
+						->execute();
+		echo $name . '<br/>';
+	}
+}
+
+function callback_maintain_funds()
+{
+	module_load_include('inc', 'donations', 'includes/funds');
+	return drupal_get_form('form_maintain_funds');
+}
+
+function callback_add_fund()
+{
+	module_load_include('inc', 'donations', 'includes/funds');
+	return drupal_get_form('form_add_fund');
+}
+
+function callback_edit_fund($p_id)
+{
+	module_load_include('inc', 'donations', 'includes/funds');
+	return drupal_get_form('form_edit_fund', $p_id);
+}
+
+function callback_maintain_donors()
+{
+	module_load_include('inc', 'donations', 'includes/donors');
+	return drupal_get_form('form_maintain_donors');
+}
+
+function callback_add_donor()
+{
+	module_load_include('inc', 'donations', 'includes/donors');
+	drupal_add_js(drupal_get_path('module', 'donations') . '/js/donors.js');
+	return drupal_get_form('form_add_donor');
+}
+
+function callback_edit_donor($p_id)
+{
+	module_load_include('inc', 'donations', 'includes/donors');
+	drupal_add_js(drupal_get_path('module', 'donations') . '/js/donors.js');
+	return drupal_get_form('form_edit_donor', $p_id);
+}
+
+function callback_delete_donor($p_id)
+{
+	module_load_include('inc', 'donations', 'includes/donors');
+	return drupal_get_form('form_delete_donor', $p_id);
+}
+
+function callback_add_donation($p_id)
+{
+	module_load_include('inc', 'donations', 'includes/donors');
+	module_load_include('inc', 'donations', 'includes/funds');
+	module_load_include('inc', 'donations', 'includes/donations');
+	return drupal_get_form('form_add_donation', $p_id);
+}
+
+function callback_edit_donation($p_id)
+{
+	module_load_include('inc', 'donations', 'includes/donors');
+	module_load_include('inc', 'donations', 'includes/funds');
+	module_load_include('inc', 'donations', 'includes/donations');
+	return drupal_get_form('form_edit_donation', $p_id);
+}
+
+function callback_delete_donation($p_id)
+{
+	module_load_include('inc', 'donations', 'includes/donors');
+	module_load_include('inc', 'donations', 'includes/funds');
+	module_load_include('inc', 'donations', 'includes/donations');
+	return drupal_get_form('form_delete_donation', $p_id);
+}
+
+function callback_donations_report_main()
+{
+	module_load_include('inc', 'donations', 'includes/reports');
+	return drupal_get_form('form_report_main');
+}
+
+function callback_donations_report($start_date, $end_date, $total_floor, $cumulative = true)
+{
+	module_load_include('inc', 'donations', 'includes/reports');
+
+	$query = _build_donations_report_query($start_date, $end_date, $total_floor, $cumulative);
+
+	$results = db_query($query)->fetchAll();
+
+	$rows = array();
+	$lastName = 'ZZZZZZZZZZZZZZZZZZZZ';
+	foreach ($results as $result)
+	{
+		if (!$cumulative && $result->name < $lastName)
+		{
+			$rows[] = array(
+				'data' => array(
+					array(
+						'data' => '<b>Year starting ' . $result->year . '</b>',
+						'colspan' => 2,
+					),
+				),
+				'class' => array('year-divider'),
+			);
+		}
+		$rows[] = array('data' => array($result->name, '$ ' . $result->total));
+		$lastName = $result->name;
+	}
+
+	$header = array(
+		array('data' => 'Name', 'fields' => 'name'),
+		array('data' => 'Total', 'fields' => 'total'),
+	);
+
+	if ($cumulative)
+	{
+		$caption = "Donors who donated a total of \$$total_floor or more between $start_date and $end_date.";
+	}
+	else
+	{
+		$caption = "Donors who donated a total of \$$total_floor or more <i>per year</i> between $start_date and $end_date.";
+	}
+
+	return theme('table', array(
+						'header' => $header,
+						'rows' => $rows,
+						'caption' => $caption,
+						'sticky' => true,
+					));
+}
+
+/**
+ * Implements hook_init
+ * 
+ * This gets called upon every page load.
+ * We are simply creating and attaching custom javascript for certain pages.
+ */
+function donations_init()
+{
+  // We always want to have a nice cursor for date popup boxes.
+	$script = <<<EOD
+jQuery('.form-type-date-popup input').bind({
+  mouseover: function() { this.style.cursor = "pointer"; },
+  mouseout: function() { this.style.cursor = "default"; },
+});
+EOD;
+
+  // Get our current path.
+	$php_url_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+  // If we are on the root donations page...
+	if (strpos($php_url_path, '/donations') == 0 && strpos($php_url_path, '/view') === false)
+	{
+		$script .= <<<EOD
+var total = 0;
+jQuery('td.amount').each(function(){total += parseFloat(this.innerHTML.trim().replace(/\\$/g, ''))});
+jQuery('#total').html('<span>Total Donated: </span>$' + total);
+EOD;
+	}
+
+  // If we are on the reports page...
+	if (strpos($php_url_path, '/reports') == 0)
+	{
+		$script .= <<<EOD
+ 		jQuery('.form-item-cumulative').hide();
+function SetDates(p_for)
+{
+	if (p_for == 'last year')
+	{
+		jQuery('#edit-start-date-datepicker-popup-0').val(jQuery('#last_year_start').val());
+		jQuery('#edit-end-date-datepicker-popup-0').val(jQuery('#last_year_end').val());
+    jQuery('input[name=cumulative][value=1]').attr('checked', 'checked');
+		jQuery('.form-item-cumulative').hide();
+	}
+	else if (p_for == 'last 2 years')
+	{
+		jQuery('#edit-start-date-datepicker-popup-0').val(jQuery('#two_years_ago_start').val());
+		jQuery('#edit-end-date-datepicker-popup-0').val(jQuery('#last_year_end').val());
+		jQuery('.form-item-cumulative').show();
+	}
+	else
+	{
+    jQuery('input[name=cumulative][value=1]').attr('checked', 'checked');
+	  jQuery('.form-item-cumulative').hide();
+	}
+}
+EOD;
+	}
+  
+  // Add the script(s).
+	drupal_add_js($script, array('type' => 'inline', 'scope' => 'footer'));
+}

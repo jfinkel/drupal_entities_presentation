@@ -1,0 +1,268 @@
+<?php
+
+/**
+ * Implements hook_schema()
+ * 
+ * This is used to define the physical database tables.  
+ * This is called automatically when the module is enabled.
+ */
+function donations_schema()
+{
+	$schema = array();
+	$schema['donors'] = _schema_donors();
+	$schema['donations'] = _schema_donations();
+	$schema['funds'] = _schema_funds();
+	return $schema;
+}
+
+function _schema_funds()
+{
+	return array(
+		'description' => 'Base table for funds.',
+		'fields' => array(
+			'id' => array(
+				'description' => 'Unique identifier',
+				'type' => 'serial',
+				'unsigned' => true,
+				'not null' => true,
+			),
+			'fund_name' => array(
+				'description' => 'The name of the fund.',
+				'type' => 'varchar',
+				'length' => 40,
+				'not null' => true,
+			),
+		),
+		'primary key' => array('id'),
+	);
+}
+
+function _schema_donors()
+{
+	return array(
+		'description' => 'Base table for donors',
+		'fields' => array(
+			'id' => array(
+				'description' => 'Unique identifier',
+				'type' => 'serial',
+				'unsigned' => true,
+				'not null' => true,
+			),
+			'account' => array(
+				'description' => 'Original eTapestry identifier.',
+				'type' => 'int',
+				'unsigned' => true,
+				'not null' => true,
+			),
+			'name' => array(
+				'description' => 'The name of the donor.',
+				'type' => 'varchar',
+				'length' => 132,
+				'not null' => true,
+			),
+			'sort_name' => array(
+				'description' => 'The name of the donor that can be sorted.',
+				'type' => 'varchar',
+				'length' => 132,
+				'not null' => false,
+			),
+			'address' => array(
+				'description' => 'The address of the donor.',
+				'type' => 'varchar',
+				'length' => 512,
+				'not null' => false,
+			),
+			'city' => array(
+				'description' => 'The city of the donor.',
+				'type' => 'varchar',
+				'length' => 50,
+				'not null' => false,
+			),
+			'state' => array(
+				'description' => 'The state/province of the donor.',
+				'type' => 'varchar',
+				'length' => 20,
+				'not null' => false,
+			),
+			'country' => array(
+				'description' => 'The country of the donor.',
+				'type' => 'char',
+				'length' => 2,
+				'not null' => false,
+			),
+			'postal_code' => array(
+				'description' => 'The postal_code of the donor.',
+				'type' => 'varchar',
+				'length' => 20,
+				'not null' => false,
+			),
+			'email' => array(
+				'description' => 'The email of the donor.',
+				'type' => 'varchar',
+				'length' => 50,
+				'not null' => false,
+			),
+			'phone_primary' => array(
+				'description' => 'The primary phone number of the donor.',
+				'type' => 'varchar',
+				'length' => 50,
+				'not null' => false,
+			),
+			'phone_secondary' => array(
+				'description' => 'The secondary phone number of the donor.',
+				'type' => 'varchar',
+				'length' => 50,
+				'not null' => false,
+			),
+			'notes' => array(
+				'description' => 'Optional note.',
+				'type' => 'text',
+				'size' => 'medium',
+				'not null' => false,
+			),
+			'date_created' => array(
+				'description' => 'The UNIX timestamp of when the donor was entered.',
+				'type' => 'varchar',
+				'length' => 32,
+				'not null' => true,
+			),
+			'date_modified' => array(
+				'description' => 'The UNIX timestamp of when the donor was modified.',
+				'type' => 'varchar',
+				'length' => 32,
+				'not null' => false,
+			),
+			'created_by' => array(
+				'description' => 'The uid of the person who entered the donor.',
+				'type' => 'int',
+				'unsigned' => true,
+				'not null' => true,
+			),
+			'modified_by' => array(
+				'description' => 'The uid of the person who modified the donor.',
+				'type' => 'int',
+				'unsigned' => true,
+				'not null' => FALSE,
+			),
+			'anonymous' => array(
+				'description' => 'Indicates if the donor wishes to be anonymous.',
+				'type' => 'int',
+				'unsigned' => true,
+				'not null' => true,
+				'default value' => 0,
+			),
+			'receive_emails' => array(
+				'description' => 'Indicates if the donor wishes to receive emails.',
+				'type' => 'int',
+				'unsigned' => true,
+				'not null' => true,
+				'default value' => 1,
+			),
+		),
+		'primary key' => array('id'),
+	);
+}
+
+function _schema_donations()
+{
+	return array(
+		'description' => 'Base table for donations',
+		'fields' => array(
+			'id' => array(
+				'description' => 'Unique identifier',
+				'type' => 'serial',
+				'unsigned' => true,
+				'not null' => true,
+			),
+			'donor_id' => array(
+				'description' => 'Identifies the donor.',
+				'type' => 'int',
+				'unsigned' => true,
+				'not null' => true,
+			),
+			'amount' => array(
+				'description' => 'The amount of the donation',
+				'type' => 'float',
+				'size' => 'medium',
+				'unsigned' => true,
+				'not null' => true,
+			),
+			'fund_id' => array(
+				'description' => 'Identifies the fund.',
+				'type' => 'int',
+				'unsigned' => true,
+				'not null' => true,
+			),
+			'approach_id' => array(
+				'description' => 'Identifies the approach.',
+				'type' => 'int',
+				'unsigned' => true,
+				'not null' => false,
+			),
+			'note' => array(
+				'description' => 'Optional note.',
+				'type' => 'text',
+				'size' => 'medium',
+				'not null' => false,
+			),
+			'date_donated' => array(
+				'description' => 'The date and time of the donation.',
+				'type' => 'timestamp',
+				'length' => 32,
+				'not null' => true,
+			),
+			'date_entered' => array(
+				'description' => 'The date and time of the donation was recorded.',
+				'type' => 'timestamp',
+				'length' => 32,
+				'not null' => true,
+			),
+			'entered_by' => array(
+				'description' => 'The uid of the person who entered the donation.',
+				'type' => 'int',
+				'unsigned' => true,
+				'not null' => true,
+			),
+			'date_modified' => array(
+				'description' => 'The date and time of the donation was modified.',
+				'type' => 'timestamp',
+				'length' => 32,
+				'not null' => true,
+			),
+			'modified_by' => array(
+				'description' => 'The uid of the person who modified the donation.',
+				'type' => 'int',
+				'unsigned' => true,
+				'not null' => true,
+			),
+		),
+		'primary key' => array('id'),
+		'unique keys' => array('donor_donation' => array('donor_id', 'date')),
+	);
+}
+
+/**
+ * Implements HOOK_uninstall 
+ * 
+ * This is used to drop all the tables that this mopdule created.
+ * This is called automatically when the module is uninstalled (NOT when it is disabled).
+ */
+function donations_uninstall()
+{
+	if (db_table_exists('donors'))
+	{
+		db_drop_table('donors');
+	}
+  
+	if (db_table_exists('donations'))
+	{
+		db_drop_table('donations');
+	}
+  
+	if (db_table_exists('funds'))
+	{
+		db_drop_table('funds');
+	}
+  
+	return t('The donations module has been uninstalled.');
+}
